@@ -4,6 +4,7 @@ var DomoChamp = function DomoChamp(props) {
   if(props.domos.length === 0){
     return React.createElement(
       "h3",
+      "",
       "There is no champion because you have no Domos!"
     );
   }
