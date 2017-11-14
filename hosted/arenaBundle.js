@@ -1,52 +1,38 @@
 "use strict";
 
-var handleDomo = function handleDomo(e) {
-  e.preventDefault();
-
-  $("#domoMessage").animate({ width: 'hide' }, 350);
-
-  if ($("#domoName").val() == '' || $("#domoAge").val() == '') {
-    handleError("RAWR! All fields are required");
-    return false;
+var DomoChamp = function DomoChamp(props) {
+  if(props.domos.length === 0){
+    return React.createElement(
+      "h3",
+      "There is no champion because you have no Domos!"
+    );
   }
-
-  sendAjax('POST', $("#domoForm").attr("action"), $("#domoForm").serialize(), function () {
-    loadDomosFromServer();
+  
+  var champDank = 0;
+  var champAge = 0;
+  var champName = "";
+  
+  props.domos.map(function(domo) {
+    if(domo.dankness > champDank){
+      champName = domo.name;
+      champAge = domo.age;
+      champDank = domo.dankness;
+    } else if(domo.dankness === champDank){
+      if(domo.age > champAge){
+        champName = domo.name;
+        champAge = domo.age;
+        champDank = domo.dankness;
+      }
+    }
   });
-
-  return false;
-};
-
-var DomoForm = function DomoForm(props) {
+  
   return React.createElement(
-    "form",
-    { id: "domoForm",
-      onSubmit: handleDomo,
-      name: "domoForm",
-      action: "/maker",
-      method: "POST",
-      className: "domoForm"
-    },
-    React.createElement(
-      "label",
-      { htmlFor: "name" },
-      "Name: "
-    ),
-    React.createElement("input", { id: "domoName", type: "text", name: "name", placeholder: "Domo Name" }),
-    React.createElement(
-      "label",
-      { htmlForm: "age" },
-      "Age: "
-    ),
-    React.createElement("input", { id: "domoAge", type: "text", name: "age", placeholder: "Domo Age" }),
-    React.createElement(
-      "label",
-      { htmlForm: "dankness" },
-      "Dankness: "
-    ),
-    React.createElement("input", { id: "domoDankness", type: "text", name: "dankness", placeholder: "Domo Dankness" }),
-    React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
-    React.createElement("input", { className: "makeDomoSubmit", type: "submit", value: "Make Domo" })
+    "h1",
+    "",
+    champName, 
+    " is the champion, with a dankness level of ",
+    champDank,
+    "!"
   );
 };
 
@@ -96,18 +82,12 @@ var DomoList = function DomoList(props) {
   );
 };
 
-var loadDomosFromServer = function loadDomosFromServer() {
+var setup = function setup(csrf) {
   sendAjax('GET', '/getDomos', null, function (data) {
     ReactDOM.render(React.createElement(DomoList, { domos: data.domos }), document.querySelector("#domos"));
+    
+    ReactDOM.render(React.createElement(DomoChamp, { domos: data.domos }), document.querySelector("#domoChampion"));
   });
-};
-
-var setup = function setup(csrf) {
-  ReactDOM.render(React.createElement(DomoForm, { csrf: csrf }), document.querySelector("#makeDomo"));
-
-  ReactDOM.render(React.createElement(DomoList, { domos: [] }), document.querySelector("#domos"));
-
-  loadDomosFromServer();
 };
 
 var getToken = function getToken() {
